@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split PDF - MYPDF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right, #f9f9fc, #e8f0ff);
+            margin: 0;
+            padding: 0;
+            color: #222;
+        }
+
+        header {
+            background: #fff;
+            padding: 15px 40px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-size: 22px;
+            color: #d62828;
+            font-weight: bold;
+        }
+
+        nav a {
+            margin-left: 20px;
+            color: #444;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+            nav a:hover {
+                color: #2979ff;
+            }
+
+        .main {
+            display: flex;
+            padding: 40px;
+            max-width: 1200px;
+            margin: auto;
+            gap: 40px;
+        }
+
+        .preview-area {
+            flex: 3;
+            background: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .split-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .split-box {
+            padding: 12px;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+            .split-box:hover {
+                transform: translateY(-3px);
+            }
+
+        canvas {
+            border-radius: 8px;
+            margin-top: 10px;
+            max-width: 100%;
+        }
+
+        .sidebar {
+            flex: 1;
+            background: #fff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        }
+
+        .range-group {
+            margin-bottom: 15px;
+        }
+
+            .range-group input {
+                width: 100%;
+                padding: 10px;
+                margin-top: 6px;
+                border-radius: 8px;
+                border: 1px solid #ccc;
+                font-size: 15px;
+            }
+
+        .btn, .add-range-btn, .zip-btn {
+            background: linear-gradient(135deg, #d62828, #ff5252);
+            color: #fff;
+            padding: 12px;
+            border: none;
+            width: 100%;
+            font-size: 16px;
+            border-radius: 10px;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-range-btn {
+            background: linear-gradient(135deg, #2979ff, #00bfff);
+        }
+
+        .zip-btn {
+            background: linear-gradient(135deg, #222, #555);
+        }
+
+        .upload-btn {
+            margin: 30px auto;
+            display: block;
+            background: linear-gradient(135deg, #2979ff, #00bfff);
+            color: white;
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-size: 17px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">❤ MYPDF</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="merge.html">Merge PDF</a>
+            <a href="#">Compress PDF</a>
+            <a href="#">Convert PDF</a>
+        </nav>
+    </header>
+
+    <label class="upload-btn" onclick="document.getElementById('fileInput').click()">Upload PDF</label>
+    <input type="file" id="fileInput" accept="application/pdf">
+
+    <div class="main">
+        <div class="preview-area">
+            <h2 style="text-align:center;">Preview of Split Sections</h2>
+            <div class="split-preview" id="splitPreviewContainer"></div>
+            <button class="zip-btn" onclick="downloadZip()">Download All as ZIP</button>
+        </div>
+        <div class="sidebar">
+            <h3>Split Options</h3>
+            <div id="rangeFields">
+                <div class="range-group">
+                    <label>Page Range (e.g. 1-3)</label>
+                    <input type="text" name="range" placeholder="1-3">
+                </div>
+            </div>
+            <button class="add-range-btn" onclick="addRangeField()">+ Add Another Range</button>
+            <button class="btn" onclick="splitPDF()">Split PDF</button>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFile = null;
+        let loadedPdf = null;
+        let splitFiles = [];
+
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            uploadedFile = file;
+            const fileURL = URL.createObjectURL(file);
+            loadedPdf = await pdfjsLib.getDocument(fileURL).promise;
+        });
+
+        function addRangeField() {
+            const container = document.getElementById('rangeFields');
+            const div = document.createElement('div');
+            div.className = 'range-group';
+            div.innerHTML = `
+            <label>Page Range (e.g. 4-6)</label>
+            <input type="text" name="range" placeholder="e.g. 4-6">
+          `;
+            container.appendChild(div);
+        }
+
+        async function splitPDF() {
+            const previewContainer = document.getElementById('splitPreviewContainer');
+            previewContainer.innerHTML = '';
+            splitFiles = [];
+
+            const inputs = document.querySelectorAll('input[name="range"]');
+            const ranges = Array.from(inputs).map(input => input.value.trim()).filter(Boolean);
+
+            if (!uploadedFile || ranges.length === 0) {
+                alert("Please upload a PDF and enter at least one range.");
+                return;
+            }
+
+            const fileBuffer = await uploadedFile.arrayBuffer();
+            const sourcePdf = await PDFLib.PDFDocument.load(fileBuffer);
+
+            for (let i = 0; i < ranges.length; i++) {
+                const range = ranges[i];
+                const [start, end] = range.split('-').map(n => parseInt(n.trim()));
+                if (isNaN(start) || isNaN(end)) continue;
+
+                const newPdf = await PDFLib.PDFDocument.create();
+                const pages = await newPdf.copyPages(sourcePdf, Array.from({ length: end - start + 1 }, (_, j) => start - 1 + j));
+                pages.forEach(p => newPdf.addPage(p));
+
+                const pdfBytes = await newPdf.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const blobUrl = URL.createObjectURL(blob);
+
+                splitFiles.push({ name: `split-${i + 1}.pdf`, blob });
+
+                // Render preview
+                const canvas = document.createElement('canvas');
+                const subPdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+                const firstPage = await subPdf.getPage(1);
+                const viewport = firstPage.getViewport({ scale: 0.8 });
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                await firstPage.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+
+                const box = document.createElement('div');
+                box.className = 'split-box';
+                box.innerHTML = `<strong>Split ${i + 1}</strong>`;
+                box.appendChild(canvas);
+
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = `split-${i + 1}.pdf`;
+                link.innerText = 'Download';
+                link.style.display = 'block';
+                link.style.marginTop = '8px';
+
+                box.appendChild(link);
+                previewContainer.appendChild(box);
+            }
+        }
+
+        async function downloadZip() {
+            if (splitFiles.length === 0) return alert("Split PDFs first.");
+
+            const zip = new JSZip();
+            splitFiles.forEach(file => zip.file(file.name, file.blob));
+
+            const content = await zip.generateAsync({ type: 'blob' });
+            const zipLink = document.createElement('a');
+            zipLink.href = URL.createObjectURL(content);
+            zipLink.download = "split_pdfs.zip";
+            zipLink.click();
+        }
+    </script>
+</body>
+</html>

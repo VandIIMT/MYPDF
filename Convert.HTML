@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert PDF - MYPDF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #f7f9ff, #e3f2fd);
+            color: #333;
+        }
+
+        header {
+            background: #fff;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #d62828;
+        }
+
+        nav a {
+            margin-left: 20px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            nav a:hover {
+                color: #2979ff;
+            }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            background: #eee;
+            border: none;
+            padding: 10px 20px;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+
+            .tab-btn.active {
+                background: #2979ff;
+                color: white;
+            }
+
+        .upload-area {
+            margin-top: 20px;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #2979ff, #00bfff);
+            color: white;
+            padding: 14px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .preview-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .convert-btn {
+            margin-top: 20px;
+            background: linear-gradient(135deg, #28a745, #34d058);
+            color: white;
+            padding: 12px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">❤ MYPDF</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="merge.html">Merge PDF</a>
+            <a href="split.html">Split PDF</a>
+            <a href="compress.html">Compress PDF</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Convert PDF Files</h1>
+        <p>Select a conversion type and upload your file.</p>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="selectTool('pdfToJpg')">PDF to JPG</button>
+            <button class="tab-btn" onclick="selectTool('jpgToPdf')">JPG to PDF</button>
+            <button class="tab-btn" onclick="selectTool('pdfToWord')">PDF to Word</button>
+            <button class="tab-btn" onclick="selectTool('wordToPdf')">Word to PDF</button>
+        </div>
+
+        <div class="upload-area">
+            <label class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose File</label>
+            <input type="file" id="fileInput" accept="application/pdf,image/jpeg,.doc,.docx">
+            <div class="preview-box" id="preview">No file chosen.</div>
+            <button class="convert-btn" onclick="convertFile()">Convert File</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedTool = 'pdfToJpg';
+        const preview = document.getElementById('preview');
+
+        function selectTool(tool) {
+            selectedTool = tool;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function () {
+            if (this.files.length > 0) {
+                preview.innerText = "Selected file: " + this.files[0].name;
+            } else {
+                preview.innerText = "No file chosen.";
+            }
+        });
+
+        function convertFile() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput.files.length) {
+                alert('Please choose a file first.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            let endpoint = '';
+            if (selectedTool === 'pdfToJpg') endpoint = '/convert/pdf-to-jpg';
+            else if (selectedTool === 'jpgToPdf') endpoint = '/convert/jpg-to-pdf';
+            else if (selectedTool === 'pdfToWord') endpoint = '/convert/pdf-to-word';
+            else if (selectedTool === 'wordToPdf') endpoint = '/convert/word-to-pdf';
+
+            if (!endpoint) {
+                alert('Conversion type not supported yet.');
+                return;
+            }
+
+            fetch(endpoint, {
+                method: 'POST',
+                body: formData,
+            })
+                .then(async res => {
+                    if (!res.ok) throw new Error('Conversion failed.');
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'converted.zip';
+                    link.click();
+                })
+                .catch(err => alert(err.message));
+        }
+    </script>
+</body>
+</html>

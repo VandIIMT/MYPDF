@@ -1,0 +1,175 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MYPDF - All PDF Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #f7f8fa;
+            color: #111;
+        }
+
+        header {
+            background: #fff;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+            header h1 {
+                color: #e53935;
+                margin: 0;
+                font-size: 1.4rem;
+            }
+
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 20px 30px;
+        }
+
+            .hero h2 {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+
+            .hero p {
+                font-size: 1rem;
+                color: #555;
+            }
+
+        .tool-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
+
+            .tool-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+            }
+
+            .tool-card h3 {
+                margin: 0 0 8px;
+                font-size: 1.1rem;
+            }
+
+            .tool-card p {
+                font-size: 0.9rem;
+                color: #666;
+            }
+
+            .tool-card a {
+                display: block;
+                text-decoration: none;
+                margin-top: 10px;
+                color: #1e88e5;
+                font-weight: 600;
+            }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.2rem;
+            }
+
+            nav a {
+                margin-left: 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>❤️ MYPDF</h1>
+        <nav>
+            <a href="merge.html">Merge PDF</a>
+            <a href="split.html">Split PDF</a>
+            <a href="#">Compress PDF</a>
+            <a href="convert.html">Convert PDF</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h2>Every tool you need to work with PDFs in one place</h2>
+        <p>All tools are 100% FREE and easy to use! Merge, split, compress, convert, rotate, unlock and watermark PDFs with just a few clicks.</p>
+    </section>
+
+    <section class="tool-grid">
+        <div class="tool-card">
+            <h3>Merge PDF</h3>
+            <p>Combine PDFs in the order you want</p>
+            <a href="merge.html">Try it →</a>
+        </div>
+
+        <div class="tool-card">
+            <h3>Split PDF</h3>
+            <p>Separate one or more pages into new files</p>
+            <a href="split.html">Try it →</a>
+        </div>
+
+        <div class="tool-card">
+            <h3>Compress PDF</h3>
+            <p>Reduce file size without quality loss</p>
+            <a href="#">Coming Soon</a>
+        </div>
+
+        <div class="tool-card">
+            <h3>PDF to Word</h3>
+            <p>Convert PDFs to editable Word files</p>
+            <a href="convert.html">Try it →</a>
+        </div>
+
+        <div class="tool-card">
+            <h3>PDF to Excel</h3>
+            <p>Extract tables to Excel from PDF</p>
+            <a href="#">Coming Soon</a>
+        </div>
+
+        <div class="tool-card">
+            <h3>Word to PDF</h3>
+            <p>Convert DOCX files to PDF format</p>
+            <a href="convert.html">Try it →</a>
+        </div>
+
+        <div class="tool-card">
+            <h3>PowerPoint to PDF</h3>
+            <p>Turn slides into shareable PDFs</p>
+            <a href="#">Coming Soon</a>
+        </div>
+
+        <div class="tool-card">
+            <h3>Edit PDF</h3>
+            <p>Add text, images or shapes to PDFs</p>
+            <a href="#">Coming Soon</a>
+        </div>
+    </section>
+
+</body>
+</html>
